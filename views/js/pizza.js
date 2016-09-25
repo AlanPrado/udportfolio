@@ -6,9 +6,9 @@ var PIZZA_FACTORY = (function(){
     var conteiner, imageContainer;
 	var pizzaProperties = {
 		"pizzaSize": { 
-			"1": { "label": "Small", "size": 0.25 },
-			"2": { "label": "Medium", "size":  0.3333 }, 
-			"3": { "label": "Large", "size": 0.5 }
+			"1": { "label": "Small", "size": 25 },
+			"2": { "label": "Medium", "size":  33.33 }, 
+			"3": { "label": "Large", "size": 50 }
         },
 		"pizzaIngredients" : {
 			"meats": ["Pepperoni", "Sausage", "Fennel Sausage", "Spicy Sausage",	"Chicken", "BBQ Chicken", "Chorizo", "Chicken Andouille", "Salami", "Tofu", "Bacon", "Canadian Bacon", "Proscuitto", "Italian Sausage", "Ground Beef", "Anchovies", "Turkey", "Ham", "Venison", "Lamb", "Duck", "Soylent Green", "Carne Asada", "Soppressata Picante", "Coppa", "Pancetta", "Bresola", "Lox", "Guanciale", "Chili", "Beef Jerky", "Pastrami", "Kielbasa", "Scallops", "Filet Mignon"],
@@ -69,7 +69,7 @@ var PIZZA_FACTORY = (function(){
 	var generatePizzaName = function() {
 		var adjective = chooseRandomProperty(pizzaProperties.adjectivesList.properties);
 		var noun = chooseRandomProperty(pizzaProperties.nounList.properties);
-		var name = "The " + adjective.capitalize() + " " + noun.capitalize();
+		var name = ["The ", adjective.capitalize(), " ", noun.capitalize()].join('');
 		return name;
 	};
 
@@ -84,18 +84,21 @@ var PIZZA_FACTORY = (function(){
 	};
 
 	var makeRandomPizza = function () {
-		var pizza = "";
+		var pizza = [];
 		var receipt = generateReceipt();
 
+		var pIndex = 0;
 		for(var category in receipt) {
 			var ingredients = pizzaProperties.pizzaIngredients[category];
 			var qtdy = receipt[category];
 			var numberOfIngredients = ingredients.length;
 			for (var i = 0; i < qtdy; i++) {
-				pizza += "<li>" + chooseRandomProperty(ingredients, numberOfIngredients) + "</li>";
+				pizza[pIndex++] = "<li>";
+				pizza[pIndex++] = chooseRandomProperty(ingredients, numberOfIngredients);
+				pizza[pIndex++] = "</li>";
 			}
 		}
-		return pizza;
+		return pizza.join('');
 	};
 
 	var pizzaSize = function(size){
@@ -111,8 +114,8 @@ var PIZZA_FACTORY = (function(){
         var pizzaDescriptionContainer = document.createElement("div");
 
         pizzaContainer.classList.add("randomPizzaContainer");
-        pizzaContainer.appendChild(pizzaDescriptionContainer);
         pizzaContainer.appendChild(pizzaImageContainer);
+        pizzaContainer.appendChild(pizzaDescriptionContainer);
 
         pizzaImageContainer.classList.add("col-md-6");
         pizzaImageContainer.appendChild(pizzaImage);
@@ -142,18 +145,14 @@ var PIZZA_FACTORY = (function(){
     var createPizza = function(i) {
         var pizzaContainer = conteiner.cloneNode(true);
         pizzaContainer.id = "pizza" + i;
-        var items = pizzaContainer.children[0].children;
-        items[1].innerHTML = makeRandomPizza();
-        items[0].innerHTML = generatePizzaName();
+        pizzaContainer.getElementsByTagName('ul')[0].innerHTML = makeRandomPizza();
+        pizzaContainer.getElementsByTagName('h4')[0].innerHTML = generatePizzaName();
         return pizzaContainer;
     };
 
-    var changePizzaSize = function(newsize, container, windowwidth) {
-        var oldwidth = container[0].offsetWidth;
-        var dx = (newsize - oldwidth / windowwidth) * windowwidth;
-        var newWidth = oldwidth + dx;
+    var changePizzaSize = function(container, newsize) {
         for (var i = 0, max = container.length; i < max; i++) {
-            container[i].style.width = newWidth + 'px';
+            container[i].style.width = newsize + '%';
         }
     };
 

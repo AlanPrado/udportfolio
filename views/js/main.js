@@ -1,34 +1,42 @@
 var MAIN = (function() {
 	var pizzaFlavors = 100,
-		randomPizzas = document.getElementById("randomPizzas"),
 		movingPizza = document.querySelector("#movingPizzas1"),
-		container = document.querySelectorAll(".randomPizzaContainer"),
+		container,
 		randomPizzas = document.querySelector("#randomPizzas"),
 		pizzaSizeSelector = document.querySelector("#pizzaSize"),
 		moverSelector = [];
 
+    var getContainer = function() {
+        if(!container) container = document.querySelectorAll(".randomPizzaContainer");
+        return container;
+    };
+
 	var createAllPizzas = function() {
-		for (var i = 2; i < pizzaFlavors; i++) {
+		for (var i = pizzaFlavors; i >= 2; i--) {
 			randomPizzas.appendChild(PIZZA_FACTORY.createPizza(i));
 		}
 	};
 
 	var generateSlidingPizzas = function() {
-		for (var i = 0, cols = 8, s = 256; i < 200; i++) {
-			var l = (i % cols) * s;
-			var t = (Math.floor(i / cols) * s) + 'px';
-			var pizzaImg = PIZZA_FACTORY.createPizzaImg(l, t);
-			moverSelector.push(pizzaImg);
-			movingPizza.appendChild(pizzaImg);
+		var cols = 6;
+		var lineHeight = 256;
+		var backgroundPizzas = Math.ceil(window.innerHeight / lineHeight) * cols * 3;
+	    for (var i = 0; i < backgroundPizzas; i++) {
+			var l = (i % cols) * lineHeight;
+			var t = (Math.floor(i / cols) * lineHeight) + 'px';
+			moverSelector[i] = PIZZA_FACTORY.createPizzaImg(l, t);
+			movingPizza.appendChild(moverSelector[i]);
 		}
 	};
 
 	var updatePositions = function() {
 		var top = document.body.scrollTop / 1250;
+		var j = 0;
 		for (var i = 0, max = moverSelector.length; i < max; i++) {
-			var selector = moverSelector[i];
-			var phase = Math.sin(top + (i % 5));
-			selector.style.left = selector.basicLeft + 100 * phase + 'px';
+		    var selector = moverSelector[i];
+            var left = selector.basicLeft + 100 * Math.sin(top + j);
+            selector.style.left = left + 'px';
+            j = j == 4 ? 0 : j++;
 		}
 	};
 
@@ -36,7 +44,7 @@ var MAIN = (function() {
 		var pizzaSize = PIZZA_FACTORY.pizzaSize(size);
 		if(pizzaSize) {
 			pizzaSizeSelector.innerHTML = pizzaSize.label;
-			PIZZA_FACTORY.changePizzaSize(pizzaSize.size, container, randomPizzas.offsetWidth);
+			PIZZA_FACTORY.changePizzaSize(getContainer(), pizzaSize.size);
 		}
     };
 	return {
@@ -54,7 +62,9 @@ var resizePizzas = function (size) {
 	   "mark_end_resize", 
 	   "measure_pizza_resize",
        function() { MAIN.resizePizzas(size); },
-       function(time) { console.log("Time to resize pizzas: " + time[0].duration + "ms")});
+       function(time) { 
+          console.log("Time to resize pizzas: " + time[time.length - 1].duration + "ms")
+       });
 };
 
 var updatePositions = function() {
@@ -77,7 +87,9 @@ document.addEventListener('DOMContentLoaded', function () {
 	   "mark_end_generating", 
 	   "measure_pizza_generation",
        MAIN.createAllPizzas,
-       function(time) { console.log("Time to generate pizzas on load: " + time[0].duration + "ms"); });
+       function(time) { 
+          console.log("Time to generate pizzas on load: " + time[0].duration + "ms"); 
+       });
 
 	MAIN.generateSlidingPizzas();
 	updatePositions();
