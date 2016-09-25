@@ -12,7 +12,7 @@ var MAIN = (function() {
     };
 
 	var createAllPizzas = function() {
-		for (var i = pizzaFlavors; i >= 2; i--) {
+		for (var i = pizzaFlavors; i > 2; i--) {
 			randomPizzas.appendChild(PIZZA_FACTORY.createPizza(i));
 		}
 	};
